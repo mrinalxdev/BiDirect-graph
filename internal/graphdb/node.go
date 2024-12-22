@@ -37,32 +37,32 @@ func NewNode(config NodeConfig) *Node {
 
 // retrives and merges second-degree connections for
 // given number Id's from node's particition
-func(n *Node) GetSecondDegreeConnections(ctx context.Context, memberIDs []models.MemberID) ([]models.MemberID, error){
-	n.mu.RLock()
-	defer n.mu.RUnlock()
-	uniqueConnections := make(map[models.MemberID]struct{})
-	
-	for _, memberID := range memberIDs {
-		particitionID := GetPartitionID(memberID, len(n.Partition))
-		partition, exists := n.Partition[particitionID]
-		if !exists {
-			continue
-		}
+func (n *Node) GetSecondDegreeConnections(ctx context.Context, memberIDs []models.MemberID) ([]models.MemberID, error) {
+    n.mu.RLock()
+    defer n.mu.RUnlock()
+    uniqueConnections := make(map[models.MemberID]struct{})
+    
+    for _, memberID := range memberIDs {
+        partitionID := GetPartitionID(memberID, len(n.Partition))
+        partition, exists := n.Partition[partitionID]
+        if !exists {
+            continue
+        }
 
-		connections, err := partition.GetConnections(memberID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get connections for member %d:%w", memberID)
-		}
+        connections, err := partition.GetConnections(ctx, memberID)
+        if err != nil {
+            return nil, fmt.Errorf("failed to get connections for member %d: %w", memberID, err)
+        }
 
-		for _, conn := range connections {
-			uniqueConnections[conn] = struct{}{}
-		}
-	}
+        for _, conn := range connections {
+            uniqueConnections[conn] = struct{}{}
+        }
+    }
 
-	result := make([]models.MemberID, 0, len(uniqueConnections))
-	for conn := range uniqueConnections{
-		result = append(result, conn)
-	}
+    result := make([]models.MemberID, 0, len(uniqueConnections))
+    for conn := range uniqueConnections {
+        result = append(result, conn)
+    }
 
-	return result, nil
+    return result, nil
 }

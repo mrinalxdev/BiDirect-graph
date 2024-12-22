@@ -2,8 +2,8 @@ package graphdb
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/binary"
+	// "crypto/sha256"
+	// "encoding/binary"
 	"fmt"
 	"strconv"
 
@@ -28,8 +28,14 @@ func NewPartition(id int, redisAddr string) *Partition {
 }
 
 func GetPartitionID(memberID models.MemberID, totalPartitions int) int {
-	hash := sha256.Sum256([]byte(string(memberID)))
-	return int(binary.BigEndian.Uint64(hash[:8]) % uint64(totalPartitions))
+
+	if totalPartitions <= 0 {
+		return 0
+	}
+
+	// hash := sha256.Sum256([]byte(string(memberID)))
+	// return int(binary.BigEndian.Uint64(hash[:8]) % uint64(totalPartitions))
+	return int(uint64(memberID) % uint64(totalPartitions))
 }
 
 func (p *Partition) StoreConnection(ctx context.Context, conn models.Connection) error {
