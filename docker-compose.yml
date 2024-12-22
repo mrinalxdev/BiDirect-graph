@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  redis-node-1:
+    image: redis:7.0
+    container_name: graph-redis-1
+    command: redis-server --port 6379
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data-1:/data
+    networks:
+      - graph-network
+
+  redis-node-2:
+    image: redis:7.0
+    container_name: graph-redis-2
+    command: redis-server --port 6379
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data-2:/data
+    networks:
+      - graph-network
+
+  redis-node-3:
+    image: redis:7.0
+    container_name: graph-redis-3
+    command: redis-server --port 6379
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-data-3:/data
+    networks:
+      - graph-network
+
+  graph-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graph-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+    networks:
+      - graph-network
+    environment:
+      - REDIS_NODES=graph-redis-1:6379,graph-redis-2:6379,graph-redis-3:6379
+
+networks:
+  graph-network:
+    driver: bridge
+
+volumes:
+  redis-data-1:
+  redis-data-2:
+  redis-data-3:
