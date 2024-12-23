@@ -63,7 +63,7 @@ func main(){
         for _, node := range nodes {
             if _, exists := node.Partition[i]; exists {
                 found = true
-                log.Printf("Partition %D found in node %s", i, node.ID)
+                log.Printf("Partition %d found in node %s", i, node.ID)
                 break
             }
         }
@@ -72,7 +72,7 @@ func main(){
         }
     }
 
-    networkCache := ncs.NetworkCache(redisConfig.Addresses[0], 24*time.Hour)
+    networkCache := ncs.NewNetworkCache(redisConfig.Addresses[0], 24*time.Hour)
     handler := api.NewHandler(nodes, networkCache)
 
     log.Printf("Starting server with %d nodes and %d partitions per node", 
